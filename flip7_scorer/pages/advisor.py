@@ -26,7 +26,7 @@ def display_legend():
 # ---------------------
 def show():
     st.title("Tofu's Flip Seven Advisor")
-    st.write("NOTE: F3 calculator not yet implemented.")
+    st.write("NOTE: F3 calculator not yet implemented; doesnt account for you having Second Chance.")
     st.markdown("---")
 
     # Display legend
