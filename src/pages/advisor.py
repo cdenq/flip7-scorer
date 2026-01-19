@@ -48,6 +48,7 @@ def display_legend():
 # Page
 # ---------------------
 def show():
+    st.image("assets/tofu.png", width=100)
     st.title("Tofu's Flip Seven Advisor")
     st.write("NOTE: F3 calculator not yet implemented; doesnt account for you having Second Chance.")
     st.markdown("---")

@@ -42,10 +42,10 @@ streamlit run app.py
 ## Project Structure
 
 ```
-flip7-scorer/
+flip-seven-scorer/
 ├── app.py                      # Main Streamlit app entry point
 ├── assets/
-│   └── tofu.png                # App logo
+│   └── tofu.png                # Tofu
 ├── src/
 │   ├── core/
 │   │   ├── scoring.py          # Score tracking logic
