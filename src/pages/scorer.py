@@ -3,14 +3,15 @@
 # ---------------------
 import streamlit as st
 import pandas as pd
-import matplotlib  # Required for pandas styling with background_gradient
-import flip7_scorer.core.scoring as scoring
-import flip7_scorer.core.default_fields as default
+import matplotlib
+import src.core.scoring as scoring
+import src.core.default_fields as default
 
 # ---------------------
 # Page
 # ---------------------
 def show():
+    st.image("assets/tofu.png", width=100)
     st.title("Tofu's Flip Seven Scorer")
     scoring.initialize_session_state()
 
@@ -132,7 +133,7 @@ def show_game_table():
     totals = scoring.current_totals()
 
     # Player rows: text inputs (accept comma-separated values) inside a form
-    from flip7_scorer.core.scoring import parse_score_input
+    from src.core.scoring import parse_score_input
 
     with st.form(key=f"round_form_{st.session_state.round}"):
         # collect raw values for this form run so the submit handler reads them directly

@@ -2,24 +2,47 @@
 # Imports
 # ---------------------
 import streamlit as st
-from flip7_scorer.core import advisor_logic
+from src.core import advisor_logic
 
 # ---------------------
 # Helper Functions
 # ---------------------
+# Aliases for easier typing (especially on mobile)
+CARD_ALIASES = {
+    "-2": "+2",
+    "-4": "+4",
+    "-6": "+6",
+    "-8": "+8",
+    "-10": "+10",
+    "!": "x2",
+    "$": "sc",
+    "&": "fr",
+    "@": "f3",
+}
+
+
+def normalize_card(card):
+    """Convert card aliases to their canonical form."""
+    return CARD_ALIASES.get(card, card)
+
+
 def parse_card_input(input_str):
     if not input_str.strip():
         return []
 
     cards = [card.strip().lower() for card in input_str.split(",")]
-    return [card for card in cards if card]  # Filter empty strings
+    cards = [normalize_card(card) for card in cards if card]  # Normalize aliases and filter empty
+    return cards
 
 
 def display_legend():
     st.markdown("##### Types of Cards: ")
-    st.markdown("0-12, +2, +4, +6, +8, +10, x2, sc, f3, fr")
-    st.markdown("sc = second chance, f3 = flip 3, fr = freeze")
-
+    st.markdown("`0`-`12`, `+2`, `+4`, `+6`, `+8`, `+10`, `x2`, `sc`, `f3`, `fr`")
+    st.markdown("`sc` = second chance, `f3` = flip 3, `fr` = freeze")
+    st.markdown("---")
+    st.markdown("FOR EASIER TYPING ON IPHONE, I added new aliases")
+    st.markdown("`+{n}`=`-{n}` | `x2`=`!` | `sc`=`$` | `fr`=`&` | `f3`=`@`")
+    st.markdown("(so instead of switching keyboards to type `+` and then back for `2` for `+2`, just type `-2`)")
 
 # ---------------------
 # Page

@@ -10,7 +10,6 @@ import re
 # Scoring Functions
 # ---------------------
 def _get(ss: Any, name: str, default=None):
-    """Get attribute or mapping value from session-like object."""
     try:
         return ss[name]
     except Exception:
@@ -18,7 +17,6 @@ def _get(ss: Any, name: str, default=None):
 
 
 def _set(ss: Any, name: str, value):
-    """Set attribute or mapping value on session-like object."""
     try:
         ss[name] = value
     except Exception:
@@ -87,14 +85,6 @@ def current_totals(session_state=None):
 
 
 def parse_score_input(s: str) -> float:
-    """Parse a score input string which may be a number or comma-separated numbers.
-
-    Examples:
-    - "5" -> 5.0
-    - "3,4" -> 7.0
-    - "1, 2, 3.5" -> 6.5
-    - "" or invalid -> 0.0
-    """
     if s is None:
         return 0.0
     if isinstance(s, (int, float)):

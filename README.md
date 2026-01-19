@@ -1,28 +1,41 @@
-# flip-seven-scorer
+<img src="assets/tofu.png" width="100">
 
-Source code for my FlipSeven browser & advisor app.
+# Tofu's Flip Seven App
 
-## Features
+Browser app for streamlining scoring for the game Flip Seven. 
 
-### Scorer Page
-- Add player names (default 4) and start game
-- Input scores per player per round
-- Click "Next round" to commit and advance
-- Running totals with conditional color scale to show the leader
+Bonus advisor feature to help make informed decisions about risky plays. Never lose to your grandma again! (Probably.)
 
-### Advisor Page
-- Enter your drawn cards and cards of other players
-- Get strategic recommendations (HIT or STAND)
-- View current score and expected value calculations
-- See bust chance and event card probabilities
-- Detailed breakdown of expected values for each remaining card in the deck
+## Usage
 
-## Quickstart
+Visit the app here: https://tofu-flip-seven-scorer.streamlit.app/.
 
-Install requirements and run:
+In the sidebar:
+- `Scorer`: use to track both round-by-round and total scores of players
+    - will show running totals (and runway left for 200), visually indicated by an Excel-like conditional formatting
+    - **can input totals or individual numbers** (if too lazy to mental math), but make sure to put in 7 individual numbers if you actually got `Flip7` to calculate the bonus
+- `Advisor`: input the drawn cards (your own and others) to get info on the next draw
 
+## Local Installation
+1. Clone the repository:
+```bash
+git clone https://github.com/cdenq/flip-seven-scorer
+cd flip-seven-scorer
+```
+
+2. Make a new envs:
+```bash
+conda create --name flip-seven
+conda activate flip-seven
+```
+
+2. Install dependencies:
 ```bash
 pip install -r requirements.txt
+```
+
+3. Run website locally
+```bash
 streamlit run app.py
 ```
 
@@ -31,7 +44,9 @@ streamlit run app.py
 ```
 flip7-scorer/
 ├── app.py                      # Main Streamlit app entry point
-├── flip7_scorer/
+├── assets/
+│   └── tofu.png                # App logo
+├── src/
 │   ├── core/
 │   │   ├── scoring.py          # Score tracking logic
 │   │   ├── advisor_logic.py    # Advisor calculations and recommendations
@@ -41,7 +56,7 @@ flip7-scorer/
 │       └── advisor.py          # Advisor page UI
 ```
 
-## Notes
+## Future Work?
 
-- The Advisor's F3 (Flip 3) calculator is not yet implemented
-
+- add to Advisor the math behind the Flip 3 action card: chances of busting someone given their hand? chances of you busting if you Flip 3 yourself?
+    - idk i'll get to it eventually

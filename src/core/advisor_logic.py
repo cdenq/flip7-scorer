@@ -64,20 +64,6 @@ def calc_score(drawn):
 
 
 def check_bust(drawn, deck):
-    """
-    Analyze the current hand and deck to provide advice.
-    Returns a dictionary containing:
-    - current_score
-    - recommendation (HIT or STAY)
-    - expected_value
-    - expected_values_data (list of tuples)
-    - bust_chance
-    - bustable (list of tuples)
-    - event_chance
-    - events (list of tuples)
-    - unique_numbers (count of unique base numbers, excluding +n and x2)
-    - has_flip_seven (True if 7 unique numbers reached)
-    """
     drawn = [str(item) for item in drawn]
 
     # Current score
