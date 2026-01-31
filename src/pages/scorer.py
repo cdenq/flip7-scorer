@@ -6,12 +6,19 @@ import pandas as pd
 import matplotlib
 import src.core.scoring as scoring
 import src.core.default_fields as default
+from src.core.legend import render_legend
 
 # ---------------------
 # Page
 # ---------------------
 def show():
-    st.image("assets/tofu.png", width=100)
+    # Two-column header: tofu image + legend
+    header_left, header_right = st.columns([1, 3])
+    with header_left:
+        st.image("assets/tofu.png", width=100)
+    with header_right:
+        render_legend()
+
     st.title("Tofu's Flip Seven Scorer")
     scoring.initialize_session_state()
 
@@ -111,60 +118,83 @@ def show_game_table():
     if "current_round_inputs" not in st.session_state or len(st.session_state.current_round_inputs) != n:
         st.session_state.current_round_inputs = ["" for _ in players]
 
-
-    # Small CSS to make tables compact
-    st.markdown(
-        """
-    <style>
-    .compact-table th, .compact-table td { padding: 4px 6px; font-size: 12px; }
-    .player-row { margin-bottom: 4px; }
-    </style>
-    """,
-        unsafe_allow_html=True,
-    )
-
-    # Header row
-    form_cols = [1, 1]
-    r0c = st.columns(form_cols)
-    r0c[0].markdown("**Player**")
-    r0c[1].markdown(f"**Round {st.session_state.round}**")
-
-    # Precompute committed totals once
-    totals = scoring.current_totals()
-
-    # Player rows: text inputs (accept comma-separated values) inside a form
     from src.core.scoring import parse_score_input
 
-    with st.form(key=f"round_form_{st.session_state.round}"):
-        # collect raw values for this form run so the submit handler reads them directly
-        form_inputs = []
-        for i, player in enumerate(players):
-            row_cols = st.columns(form_cols)
-            row_cols[0].markdown(f"**{player}**")
-            key_name = f"round_input_{st.session_state.round}_{i}"
-            raw = row_cols[1].text_input(
-                label=f"score_{i}",
-                value=str(st.session_state.current_round_inputs[i]),
-                key=key_name,
-                label_visibility='collapsed',
-            )
-            # store input as raw string; parsing happens on submit
-            st.session_state.current_round_inputs[i] = raw
-            form_inputs.append(raw)
+    # Callback to clear a single player's input
+    def clear_input(idx):
+        round_num = st.session_state.round
+        key_name = f"round_input_{round_num}_{idx}"
+        if key_name in st.session_state:
+            st.session_state[key_name] = ""
+        st.session_state.current_round_inputs[idx] = ""
 
-        # Action buttons in the form: submitting will capture the current text inputs without needing Enter
-        submitted = st.form_submit_button("Next Round ➕", use_container_width=True)
-        if submitted:
-            parsed_list = [parse_score_input(v) for v in form_inputs]
+    # Precompute committed totals
+    totals = scoring.current_totals()
+
+    # Column layout: Player | Total Score | Running Total | Round N | Clear
+    col_weights = [2, 2, 2, 3, 1]
+
+    # Header row
+    header = st.columns(col_weights)
+    header[0].markdown("**Player**")
+    header[1].markdown("**Total Score**")
+    header[2].markdown("**Running Total**")
+    header[3].markdown(f"**Round {st.session_state.round}**")
+    header[4].markdown("")
+
+    # Player rows (no form — Enter just recalculates, doesn't commit)
+    for i, player in enumerate(players):
+        row = st.columns(col_weights)
+
+        # Player name
+        row[0].markdown(f"**{player}**")
+
+        # Total Score: "120 (80)"
+        total = totals[i]
+        left = max(0, 200 - total)
+        row[1].markdown(f"{total:.0f} ({left:.0f})")
+
+        # Round input
+        key_name = f"round_input_{st.session_state.round}_{i}"
+        if key_name not in st.session_state:
+            st.session_state[key_name] = str(st.session_state.current_round_inputs[i])
+        raw = row[3].text_input(
+            label=f"score_{i}",
+            key=key_name,
+            label_visibility="collapsed",
+        )
+        st.session_state.current_round_inputs[i] = raw
+
+        # Running Total: "+34 (154)" coloured
+        parsed = parse_score_input(raw)
+        projected = total + parsed
+        if parsed > 0:
+            color = "green"
+            display = f"+{parsed:.0f} ({projected:.0f})"
+        else:
+            color = "red"
+            display = f"{parsed:.0f} ({projected:.0f})"
+        row[2].markdown(
+            f"<span style='color: {color};'>{display}</span>",
+            unsafe_allow_html=True,
+        )
+
+        # Clear button
+        row[4].button("✕", key=f"clear_btn_{i}", on_click=clear_input, args=(i,))
+
+    # Action buttons: Next Round (primary) | Restart — same row
+    btn_left, btn_right = st.columns(2)
+    with btn_left:
+        if st.button("Next Round ➕", type="primary", use_container_width=True):
+            parsed_list = [parse_score_input(st.session_state.current_round_inputs[j]) for j in range(n)]
             scoring.commit_round(parsed_list)
-            # Reset the in-memory current inputs so the next round's widgets start empty
-            st.session_state.current_round_inputs = ["" for _ in st.session_state.players]
+            # Clear current inputs so next round starts fresh
+            st.session_state.current_round_inputs = ["" for _ in players]
             st.rerun()
-
-    # Restart remains outside the form (visible icon and full width)
-    if st.button("Restart 🔄", use_container_width=True):
-        scoring.restart_game()
-        st.rerun()
+    with btn_right:
+        if st.button("Restart 🔄", use_container_width=True):
+            scoring.restart_game()
+            st.rerun()
 
     # Combined scores & totals table
     st.markdown("---")

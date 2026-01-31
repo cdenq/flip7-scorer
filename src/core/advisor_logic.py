@@ -6,7 +6,6 @@
 # Advisor Functions
 # ---------------------
 def build_master_deck():
-    """Build and return the complete deck."""
     deck = []
     for i in range(13):
         if i > 1:
@@ -24,7 +23,6 @@ def build_master_deck():
 
 
 def pop_from_deck(ls, deck):
-    """Remove cards from deck. Returns the modified deck."""
     for item in ls:
         try:
             deck.remove(str(item))
@@ -35,7 +33,6 @@ def pop_from_deck(ls, deck):
 
 
 def calc_score(drawn):
-    """Calculate the score for a given hand of drawn cards."""
     relevant_nums = [item for item in drawn if item not in ["sc", "f3", "fr"]]
 
     flip_seven = []

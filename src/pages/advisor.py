@@ -3,29 +3,11 @@
 # ---------------------
 import streamlit as st
 from src.core import advisor_logic
+from src.core.legend import normalize_card, render_legend
 
 # ---------------------
 # Helper Functions
 # ---------------------
-# Aliases for easier typing (especially on mobile)
-CARD_ALIASES = {
-    "-2": "+2",
-    "-4": "+4",
-    "-6": "+6",
-    "-8": "+8",
-    "-10": "+10",
-    "!": "x2",
-    "$": "sc",
-    "&": "fr",
-    "@": "f3",
-}
-
-
-def normalize_card(card):
-    """Convert card aliases to their canonical form."""
-    return CARD_ALIASES.get(card, card)
-
-
 def parse_card_input(input_str):
     if not input_str.strip():
         return []
@@ -34,28 +16,19 @@ def parse_card_input(input_str):
     cards = [normalize_card(card) for card in cards if card]  # Normalize aliases and filter empty
     return cards
 
-
-def display_legend():
-    st.markdown("##### Types of Cards: ")
-    st.markdown("`0`-`12`, `+2`, `+4`, `+6`, `+8`, `+10`, `x2`, `sc`, `f3`, `fr`")
-    st.markdown("`sc` = second chance, `f3` = flip 3, `fr` = freeze")
-    st.markdown("---")
-    st.markdown("FOR EASIER TYPING ON IPHONE, I added new aliases")
-    st.markdown("`+{n}`=`-{n}` | `x2`=`!` | `sc`=`$` | `fr`=`&` | `f3`=`@`")
-    st.markdown("(so instead of switching keyboards to type `+` and then back for `2` for `+2`, just type `-2`)")
-
 # ---------------------
 # Page
 # ---------------------
 def show():
-    st.image("assets/tofu.png", width=100)
+    # Two-column header: tofu image + legend
+    header_left, header_right = st.columns([1, 3])
+    with header_left:
+        st.image("assets/tofu.png", width=100)
+    with header_right:
+        render_legend()
+
     st.title("Tofu's Flip Seven Advisor")
     st.write("NOTE: F3 calculator not yet implemented; doesnt account for you having Second Chance.")
-    st.markdown("---")
-
-    # Display legend
-    display_legend()
-
     st.markdown("---")
 
     # Input fields
@@ -135,8 +108,26 @@ def show():
         with col1:
             st.metric("Current Score", f"{advice['current_score']}")
 
+            # Expected values breakdown
+            st.markdown("#### Expected Values by Card")
+            ev_text = ""
+            for card, perc, total, delta, ev in advice["expected_values_data"]:
+                tag = f"+{delta}" if delta > 0 else str(delta)
+                ev_text += f"`{card:>3}` ({perc*100:5.2f}%) → {total:>3} ({tag:>4}) | EV: {ev:>6.2f}\n\n"
+            st.markdown(ev_text)
+
         with col2:
             st.metric("Expected Value", f"{advice['expected_value']:.2f}")
+
+            # Bust chance
+            st.markdown(f"#### Bust Chance: {advice['bust_chance']*100:.2f}%")
+            if advice["bustable"]:
+                bust_text = ""
+                for card, perc in advice["bustable"]:
+                    bust_text += f"`{card:>3}` ({perc*100:5.2f}%)\n\n"
+                st.markdown(bust_text)
+            else:
+                st.markdown("*No bust cards remaining*")
 
         with col3:
             # Display unique numbers with special styling if flip seven achieved
@@ -151,28 +142,7 @@ def show():
             else:
                 st.metric(unique_label, unique_value)
 
-        # Expected values breakdown
-        st.markdown("#### Expected Values by Card")
-        ev_text = ""
-        for card, perc, total, delta, ev in advice["expected_values_data"]:
-            tag = f"+{delta}" if delta > 0 else str(delta)
-            ev_text += f"`{card:>3}` ({perc*100:5.2f}%) → {total:>3} ({tag:>4}) | EV: {ev:>6.2f}\n\n"
-        st.markdown(ev_text)
-
-        # Bust information
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown(f"#### Bust Chance: {advice['bust_chance']*100:.2f}%")
-            if advice["bustable"]:
-                bust_text = ""
-                for card, perc in advice["bustable"]:
-                    bust_text += f"`{card:>3}` ({perc*100:5.2f}%)\n\n"
-                st.markdown(bust_text)
-            else:
-                st.markdown("*No bust cards remaining*")
-
-        with col2:
+            # Events chance
             st.markdown(f"#### Event Chance: {advice['event_chance']*100:.2f}%")
             if advice["events"]:
                 event_text = ""
